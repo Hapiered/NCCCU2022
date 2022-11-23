@@ -7,6 +7,7 @@ import pandas as pd
 
 def getFaceEncoding(src):
     image = face_recognition.load_image_file(src)
+    image = cv2.fastNlMeansDenoisingColored(image, None, 30, 30, 7, 21)
     face_locations = face_recognition.face_locations(image)
     if face_locations == []:
         return np.array([])
@@ -30,13 +31,13 @@ def getSimDist(img_encoding1, img_encoding2):
     sim = 1.0 / (1.0 + dist)
     return sim
 
-train_data=pd.read_csv("train\annos.csv")
-# img_encoding1 = getFaceEncoding("a.jpg")
-# img_encoding2 = getFaceEncoding("b.jpg")
-img_encoding1 = getFaceEncoding("telangpu.png")
-img_encoding2 = getFaceEncoding("telangpu2.png")
+# train_data=pd.read_csv("train\annos.csv")
+img_encoding1 = getFaceEncoding("a.jpg")
+img_encoding2 = getFaceEncoding("b.jpg")
+# img_encoding1 = getFaceEncoding("telangpu.png")
+# img_encoding2 = getFaceEncoding("telangpu2.png")
 if (img_encoding1.size == 0) or (img_encoding2.size == 0):
-    1
+    print("no")
 else:
     eu_dist = getEuDist(img_encoding1, img_encoding2)
     sim_dist = getSimDist(img_encoding1, img_encoding2)

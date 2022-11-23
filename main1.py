@@ -1,60 +1,70 @@
-import face_recognition
-import numpy as np
-import sys
+import dlib
 import cv2
-
-
-def display(img):  # 查看图片
-    cv2.imshow("img", img)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+import numpy as np
+import face_recognition
+import pandas as pd
+import os
 
 
 def getFaceEncoding(src):
     image = face_recognition.load_image_file(src)
+    image = cv2.fastNlMeansDenoisingColored(image, None, 30, 30, 7, 21)
     face_locations = face_recognition.face_locations(image)
-    img_ = image[face_locations[0][0]:face_locations[0][2], face_locations[0][3]:face_locations[0][1]]
-    img_ = cv2.cvtColor(img_, cv2.COLOR_BGR2RGB)
-    # display(img_)
+    if face_locations == []:
+        return np.array([])
+    img = image[face_locations[0][0]:face_locations[0][2], face_locations[0][3]:face_locations[0][1]]
     face_encoding = face_recognition.face_encodings(image, face_locations)[0]
     return face_encoding
 
 
-def simcos(A, B):
-    A = np.array(A)
-    B = np.array(B)
-    dist = np.linalg.norm(A - B)  # 二范数
+def getEuDist(img_encoding1, img_encoding2):
+    img_encoding1 = np.array(img_encoding1)
+    img_encoding2 = np.array(img_encoding2)
+    diff = np.subtract(img_encoding1, img_encoding2)
+    dist = np.sqrt(np.sum(np.square(diff)))
+    return dist
+
+
+def getSimDist(img_encoding1, img_encoding2):
+    img_encoding1 = np.array(img_encoding1)
+    img_encoding2 = np.array(img_encoding2)
+    dist = np.linalg.norm(img_encoding1 - img_encoding2)
     sim = 1.0 / (1.0 + dist)
     return sim
 
 
-def theSamePerson(one_pic, two_pic):
-    '''
-    给定两张图片，判断是否是同一个人
-    '''
-    chenglong = face_recognition.load_image_file(one_pic)
-    unknown_image = face_recognition.load_image_file(two_pic)
-    biden_encoding = face_recognition.face_encodings(chenglong)[0]
-    unknown_encoding = face_recognition.face_encodings(unknown_image)[0]
-    results = face_recognition.compare_faces([biden_encoding], unknown_encoding, tolerance=0.35)
-    print('results: ', results)
-    return results[0]
+# train_data=pd.read_csv("train\annos.csv")
+img_encoding1 = getFaceEncoding("a.jpg")
+img_encoding2 = getFaceEncoding("b.jpg")
+# img_encoding1 = getFaceEncoding("telangpu.png")
+# img_encoding2 = getFaceEncoding("telangpu2.png")
+if (img_encoding1.size == 0) or (img_encoding2.size == 0):
+    print("no")
+else:
+    eu_dist = getEuDist(img_encoding1, img_encoding2)
+    sim_dist = getSimDist(img_encoding1, img_encoding2)
 
+    print(eu_dist)
+    print(sim_dist)
 
-def main():
-    src1, src2 = r"D:\1mylearningdata\1mphil\研究生竞赛\全国高校计算机能力挑战赛2022\telangpu.png", \
-        r"D:\1mylearningdata\1mphil\研究生竞赛\全国高校计算机能力挑战赛2022\telangpu2.png"
-    # theSamePerson(src1,src2)
-    xl1 = getFaceEncoding(src1)
-    xl2 = getFaceEncoding(src2)
-    face_distances = face_recognition.face_distance([xl1], xl2)
-    value = simcos(xl1, xl2)
-    print(value)
-    print(face_distances)
-    if value > 0.75:
-        print(True)
-    else:
-        print(False)
-
-
-main()
+id_imgGroup=[]
+train_data=pd.read_csv(r"train\annos.csv")
+train_data.insert(train_data.shape[1],'EuDist',-1)
+train_data.insert(train_data.shape[1],'SimDist',-1)
+train_path = "train\data"
+file = os.walk(train_path)
+for sub_path, sub_dir_list, sub_file_list in file:
+    for sub_dir_name in sub_dir_list:
+        sub_file = os.walk(os.path.join(sub_path, sub_dir_name))
+        print(sub_dir_name)
+        for sub2_path, sub2_dir_list, sub2_file_list in sub_file:
+            img_encoding1 = getFaceEncoding(os.path.join(sub2_path, sub2_file_list[0]))
+            img_encoding2 = getFaceEncoding(os.path.join(sub2_path, sub2_file_list[1]))
+            if (img_encoding1.size == 0) or (img_encoding2.size == 0):
+                continue
+            else:
+                eu_dist = getEuDist(img_encoding1, img_encoding2)
+                sim_dist = getSimDist(img_encoding1, img_encoding2)
+                train_data.at[sub_dir_name,"EuDist"]=eu_dist
+                train_data.at[sub_dir_name,"SimDist"]=sim_dist
+                # print(os.path.join(sub2_path, sub2_file_name))
