@@ -14,8 +14,8 @@ from sklearn.utils import shuffle
 # 输出模型模块
 import joblib
 
-
-def load_dataset(data_csv_path, eu_dist=1):  # 读取特征文件列表和标签文件列表的内容，归并后返回
+ # 读取csv文件，提取特征列表和标签列表的内容，打乱顺序，并返回
+def load_dataset(data_csv_path, eu_dist=1): 
     all_data = pd.read_csv(data_csv_path)
     all_data = all_data.fillna(all_data.mean()["EuDist":"SimDist"])
     all_data = shuffle(all_data)
@@ -36,14 +36,14 @@ def load_dataset(data_csv_path, eu_dist=1):  # 读取特征文件列表和标签
     else:
         return SimDist, label
 
-
+ # 将提取的数据集，按比例划分为训练集和测试集，用于训练模型
 def split_dataset(X, y, ratio=0.8):
     X_train, y_train = X[:int(ratio * len(X))], y[:int(ratio * len(y))]  # 前四个数据作为训练集
     x_test, y_test = X[int(ratio * len(X)):], y[int(ratio * len(y)):]   # 最后一个数据作为测试集
     X_train, x_, y_train, y_ = train_test_split(X_train, y_train, test_size=0.1)  # 使用全量数据作为训练集，split函数打乱训练集
     return X_train, y_train, x_test, y_test
 
-
+# 训练模型，包括三个：knn，决策树dt和贝叶斯gnb，选用AUC指标更好的决策树dt，其余部分注释
 def train_model():
     dt_AUC_max = -1
     knn_AUC_max = -1

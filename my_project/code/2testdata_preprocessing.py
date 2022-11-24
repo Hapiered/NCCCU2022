@@ -4,7 +4,13 @@ import face_recognition
 import pandas as pd
 import os
 
-
+""" 
+function：提取人脸特征并编码
+Parameters:
+    src - 图片地址
+Returns:
+    face_encoding - 提取的人脸特征编码
+"""
 def getFaceEncoding(src):
     image = face_recognition.load_image_file(src)
     image = cv2.resize(image, (image.shape[1] * 2, image.shape[0] * 2))
@@ -17,7 +23,14 @@ def getFaceEncoding(src):
     face_encoding = face_recognition.face_encodings(image, face_locations)[0]
     return face_encoding
 
-
+""" 
+function：计算两向量间的欧氏距离
+Parameters:
+    img_encoding1 - 图片1的人脸128维编码
+    img_encoding2 - 图片2的人脸128维编码
+Returns:
+    dist - 欧氏距离
+"""
 def getEuDist(img_encoding1, img_encoding2):
     img_encoding1 = np.array(img_encoding1)
     img_encoding2 = np.array(img_encoding2)
@@ -25,7 +38,14 @@ def getEuDist(img_encoding1, img_encoding2):
     dist = np.sqrt(np.sum(np.square(diff)))
     return dist
 
-
+""" 
+function：计算两向量间的余弦相似距离
+Parameters:
+    img_encoding1 - 图片1的人脸128维编码
+    img_encoding2 - 图片2的人脸128维编码
+Returns:
+    sim - 余弦相似距离
+"""
 def getSimDist(img_encoding1, img_encoding2):
     img_encoding1 = np.array(img_encoding1)
     img_encoding2 = np.array(img_encoding2)
@@ -33,10 +53,7 @@ def getSimDist(img_encoding1, img_encoding2):
     sim = 1.0 / (1.0 + dist)
     return sim
 
-
-id_imgGroup = []
-
-
+# 遍历图片数据集，降噪，提取特征，计算两图片之间的距离，并将输出结果存入csv文件中
 test_path = "../init_data/toUser/test/data"
 file = os.walk(test_path)
 subdirs = os.listdir(test_path)
