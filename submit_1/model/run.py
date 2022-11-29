@@ -107,6 +107,10 @@ def main(to_pred_dir, result_save_path):
     for subdir, label in zip(subdirs, labels):
         fw.write("{},{}\n".format(subdir, label))
     fw.close()
+    
+    # result_table = pd.DataFrame(columns=["label"], index=range(len(labels)))
+    # result_table["label"] = labels
+    # result_table.to_csv(result_save_path+ "/result.csv", index_label="id")
 
 
 if __name__ == "__main__":
