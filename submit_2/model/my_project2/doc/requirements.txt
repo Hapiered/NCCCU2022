@@ -1,0 +1,7 @@
+keras
+numpy
+pandas
+opencv-python
+scikit-learn
+joblib
+face_recognition

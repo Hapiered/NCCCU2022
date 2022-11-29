@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		// "python.defaultInterpreterPath": "venv/bin/python"
+		// "python.defaultInterpreterPath": "~/venv/graviti/bin/python"
+		// "python.defaultInterpreterPath": "~/venv/cv/bin/python"
+		"python.defaultInterpreterPath": "~/venv/trad-ml/bin/python"
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Python: 当前文件",
+				"type": "python",
+				"request": "launch",
+				"program": "${file}",
+				"console": "integratedTerminal"
+			}
+		]
+	}
+}
